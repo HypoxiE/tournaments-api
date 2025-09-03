@@ -1,0 +1,21 @@
+\set passw `echo $PG_ADMIN_PASSWORD`
+ALTER USER postgres WITH PASSWORD :'passw';
+
+CREATE ROLE tournament_api_client WITH
+	LOGIN
+	NOSUPERUSER
+	NOCREATEDB
+	NOCREATEROLE
+	INHERIT
+	REPLICATION
+	NOBYPASSRLS
+	CONNECTION LIMIT -1
+	PASSWORD 'tournament_api';
+
+CREATE DATABASE tournament_api_db
+	WITH
+	OWNER = tournament_api_client
+	ENCODING = 'UTF8'
+	LOCALE_PROVIDER = 'libc'
+	CONNECTION LIMIT = -1
+	IS_TEMPLATE = False;

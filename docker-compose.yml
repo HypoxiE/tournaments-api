@@ -1,0 +1,45 @@
+networks:
+  tournament-api-network:
+    name: tournament-api-network
+    driver: bridge
+
+services:
+  postgres:
+    image: postgres:17
+    container_name: tournament-api-postgres
+    networks: 
+      - tournament-api-network
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - ./postgres/pgdata:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    restart: unless-stopped
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  tournament-get-form-api:
+    build: ./tournaments-get-form-api
+    container_name: tournament-get-form-api
+    restart: unless-stopped
+    networks: 
+      - tournament-api-network
+    env_file:
+      - .env
+
+    ports:
+      - "8080:8080"
+    command: ["./myapp"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  db_data:
