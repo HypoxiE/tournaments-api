@@ -59,6 +59,7 @@ func From_Json(jsonData []byte, ip string) (Result, error) {
 	result.SteamID = result.GetterSteamID
 	result.Mail = result.GetterMail
 
+	result.Status = 0
 	result.Score = 0
 	result.IP = ip
 
@@ -66,22 +67,6 @@ func From_Json(jsonData []byte, ip string) (Result, error) {
 }
 
 func (user Result) To_Json() ([]byte, error) {
-	type deserial struct {
-		ID uint `gorm:"primaryKey" json:"-"`
-		IP string `gorm:"type:inet" json:"-"`
-		TournamentID uint `json:"tournament_id"`
-		Tournament Tournament `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"-"`
-		Username  string `json:"username"`
-		Avatar string `json:"avatar_url"`
-		Mail string `json:"mail"`
-		SteamID string `json:"steam_id"`
-		Version string `json:"version"`
-
-		Score int `json:"score"`
-		Cost int `json:"cost"`
-		Status int `json:"status"`
-		Metrics []Metric `json:"metrics"`
-	}
 	jsonBytes, err := json.Marshal(user)
 	return jsonBytes, err
 }

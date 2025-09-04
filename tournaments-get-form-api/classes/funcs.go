@@ -1,6 +1,7 @@
 package classes
 
 import (
+	"math"
 	"github.com/Knetic/govaluate"
 )
 
