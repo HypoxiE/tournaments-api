@@ -56,15 +56,15 @@ func Registration(c *gin.Context, manager *database.DataBase) {
 		return
 	}
 
+	result := manager.DataBase.Create(&user)
+	if result.Error != nil {
+		log.Fatalf("[ERROR] failed to insert user: %v", result.Error)
+	}
+
 	jsonBytes, err := user.To_Json()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
-	}
-
-	result := manager.DataBase.Create(&user)
-	if result.Error != nil {
-		log.Fatalf("[ERROR] failed to insert user: %v", result.Error)
 	}
 
 	log.Printf("[INFO] New registration: %v!", user.Username)

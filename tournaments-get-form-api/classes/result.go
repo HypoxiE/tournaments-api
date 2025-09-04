@@ -14,7 +14,7 @@ type Metric struct {
 }
 
 type Result struct {
-	ID uint `gorm:"primaryKey" json:"-"`
+	ID uint `gorm:"primaryKey" json:"result_id"`
 	TournamentID uint `json:"tournament_id"`
 	Tournament Tournament `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"-"`
 	Username  string `json:"username"`
@@ -59,6 +59,7 @@ func From_Json(jsonData []byte, ip string) (Result, error) {
 	result.SteamID = result.GetterSteamID
 	result.Mail = result.GetterMail
 
+	result.ID = 0
 	result.Status = 0
 	result.Score = 0
 	result.IP = ip
