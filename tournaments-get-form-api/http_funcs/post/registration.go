@@ -2,6 +2,7 @@ package post
 
 import (
 	"log"
+	"fmt"
 	"tournaments-api/classes"
 	"tournaments-api/database"
 	"net/http"
@@ -30,6 +31,25 @@ func Registration(c *gin.Context, manager *database.DataBase) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	find_key := func(metric classes.Metric) bool {
+		for _, variable := range tournament.Variables {
+			if variable == metric.Key {
+				return true
+			}
+		}
+		return false
+	}
+	for _, metric := range user.Metrics {
+		if !find_key(metric) {
+			err = fmt.Errorf("Error: unknown metric %v", metric.Key)
+		}
+	}
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
 	err = user.CalculateScore(tournament)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

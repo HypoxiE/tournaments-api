@@ -4,6 +4,7 @@ import (
 	"log"
 	"tournaments-api/database"
 	"tournaments-api/http_funcs/post"
+	"tournaments-api/http_funcs/get"
 	"runtime"
 
 	"github.com/gin-gonic/gin"
@@ -18,6 +19,10 @@ func main() {
 
 	router.POST("/registration", func(c *gin.Context) {
 		post.Registration(c, &manager)
+	})
+
+	router.GET("/leaderbord", func(c *gin.Context) {
+		get.Leaderbord(c, &manager)
 	})
 
 	router.Run(":8080")

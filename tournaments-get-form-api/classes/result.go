@@ -3,7 +3,6 @@ package classes
 import (
 	"encoding/json"
 	"errors"
-	"net"
 )
 
 type Metric struct {
@@ -16,18 +15,23 @@ type Metric struct {
 
 type Result struct {
 	ID uint `gorm:"primaryKey" json:"-"`
-	IP net.IP `gorm:"type:inet" json:"-"`
 	TournamentID uint `json:"tournament_id"`
 	Tournament Tournament `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"-"`
 	Username  string `json:"username"`
 	Avatar string `json:"avatar_url"`
-	Mail string `json:"mail"`
-	SteamID string `json:"steam_id"`
 	Version string `json:"version"`
-
 	Score int `json:"score"`
 	Cost int `json:"cost"`
 	Status int `json:"status"` // 0 - не проверено; 1 - проверено, разрешено; -1 - проверено, заблокировано; -2 - автоматическая блокировка
+
+	//confident
+	GetterSteamID string `json:"steam_id" gorm:"-"`
+	SteamID string `json:"-"`
+	GetterMail string `json:"mail" gorm:"-"`
+	Mail string `json:"-"`
+	IP string `gorm:"type:inet" json:"-"`
+
+
 	Metrics []Metric `json:"metrics"`
 }
 
@@ -44,7 +48,7 @@ func From_Json(jsonData []byte, ip string) (Result, error) {
 	} else if (result.Username == "") {
 		err := errors.New("error: The username field is missing")
 		return result, err
-	} else if (result.Mail == "") {
+	} else if (result.GetterMail == "") {
 		err := errors.New("error: The mail field is missing")
 		return result, err
 	} else if (result.Version == "") {
@@ -52,13 +56,32 @@ func From_Json(jsonData []byte, ip string) (Result, error) {
 		return result, err
 	}
 
+	result.SteamID = result.GetterSteamID
+	result.Mail = result.GetterMail
+
 	result.Score = 0
-	result.IP = net.ParseIP(ip)
+	result.IP = ip
 
 	return result, nil
 }
 
 func (user Result) To_Json() ([]byte, error) {
+	type deserial struct {
+		ID uint `gorm:"primaryKey" json:"-"`
+		IP string `gorm:"type:inet" json:"-"`
+		TournamentID uint `json:"tournament_id"`
+		Tournament Tournament `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"-"`
+		Username  string `json:"username"`
+		Avatar string `json:"avatar_url"`
+		Mail string `json:"mail"`
+		SteamID string `json:"steam_id"`
+		Version string `json:"version"`
+
+		Score int `json:"score"`
+		Cost int `json:"cost"`
+		Status int `json:"status"`
+		Metrics []Metric `json:"metrics"`
+	}
 	jsonBytes, err := json.Marshal(user)
 	return jsonBytes, err
 }
