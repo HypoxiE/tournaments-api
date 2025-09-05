@@ -19,7 +19,7 @@ func Registration(c *gin.Context, manager *database.DataBase) {
 		return
 	}
 
-	user, err := classes.From_Json(body, c.ClientIP())
+	user, err := classes.RegDataFromJson(body, c.ClientIP())
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -30,6 +30,15 @@ func Registration(c *gin.Context, manager *database.DataBase) {
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
+	}
+
+	// Проверка на сроки отправки
+
+	if user.Timestamp < tournament.StartTimestamp {
+		err = fmt.Errorf("error: the tournament has not started yet")
+	}
+	if user.Timestamp > tournament.StopTimestamp {
+		err = fmt.Errorf("error: the tournament has already ended")
 	}
 
 	// Проверка метрик
@@ -62,7 +71,7 @@ func Registration(c *gin.Context, manager *database.DataBase) {
 	}
 	for _, meta := range user.Metadata {
 		if !find_meta_key(meta) {
-			err = fmt.Errorf("error: unknown metric %v", meta.Key)
+			err = fmt.Errorf("error: unknown metadata %v", meta.Key)
 		}
 	}
 	find_key_in_meta := func(meta string) bool {
@@ -75,7 +84,7 @@ func Registration(c *gin.Context, manager *database.DataBase) {
 	}
 	for _, meta := range tournament.Metadata {
 		if !find_key_in_meta(meta) {
-			err = fmt.Errorf("error: unknown metric %v", meta)
+			err = fmt.Errorf("error: missing metadata with the key %v", meta)
 		}
 	}
 	if err != nil {
@@ -95,7 +104,7 @@ func Registration(c *gin.Context, manager *database.DataBase) {
 		log.Fatalf("[ERROR] failed to insert user: %v", result.Error)
 	}
 
-	jsonBytes, err := user.To_Json()
+	jsonBytes, err := user.ToJson()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

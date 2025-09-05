@@ -2,14 +2,15 @@ package main
 
 import (
 	"log"
-	"tournaments-api/database"
-	"tournaments-api/http_funcs/post"
-	"tournaments-api/http_funcs/get"
 	"net/http"
 	"runtime"
+	"tournaments-api/database"
+	"tournaments-api/http_admin_funcs/adminpost"
+	"tournaments-api/http_funcs/get"
+	"tournaments-api/http_funcs/post"
 
-	"golang.org/x/time/rate"
 	"github.com/gin-gonic/gin"
+	"golang.org/x/time/rate"
 )
 
 func RateLimitMiddleware(r rate.Limit, b int) gin.HandlerFunc {
@@ -28,6 +29,7 @@ func RateLimitMiddleware(r rate.Limit, b int) gin.HandlerFunc {
 func main() {
 	runtime.GOMAXPROCS(1)
 	router := gin.Default()
+	adminRouter := gin.Default()
 	router.Use(RateLimitMiddleware(5, 10))
 
 	manager := database.Init()
@@ -41,5 +43,17 @@ func main() {
 		get.Leaderbord(c, &manager)
 	})
 
-	router.Run(":8080")
+	adminRouter.POST("/add_tournament", func(c *gin.Context) {
+		adminpost.AddTournament(c, &manager)
+	})
+
+	go func() {
+		if err := adminRouter.Run(":9090"); err != nil {
+			panic(err)
+		}
+	}()
+
+	if err := router.Run(":8080"); err != nil {
+		panic(err)
+	}
 }

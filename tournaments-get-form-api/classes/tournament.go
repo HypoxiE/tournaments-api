@@ -1,12 +1,23 @@
 package classes
 
-import "github.com/lib/pq"
+import (
+	"encoding/json"
+
+	"github.com/lib/pq"
+)
 
 type Tournament struct {
-	ID        uint `gorm:"primaryKey"`
-	Name      string
-	Metadata  pq.StringArray `gorm:"type:text[]"`
-	Variables pq.StringArray `gorm:"type:text[]"`
-	Formula   string
-	Results   []Result
+	ID             uint           `gorm:"primaryKey" json:"tournament_id"`
+	Name           string         `json:"name"`
+	StartTimestamp uint64         `json:"start_timestamp"`
+	StopTimestamp  uint64         `json:"stop_timestamp"`
+	Metadata       pq.StringArray `gorm:"type:text[]" json:"metadata"`
+	Variables      pq.StringArray `gorm:"type:text[]" json:"variables"`
+	Formula        string         `json:"formula"`
+	Results        []Result
+}
+
+func (tournament Tournament) ToJson() ([]byte, error) {
+	jsonBytes, err := json.Marshal(tournament)
+	return jsonBytes, err
 }

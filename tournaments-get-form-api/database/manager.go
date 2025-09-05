@@ -1,9 +1,9 @@
 package database
 
 import (
-	"os"
 	"fmt"
 	"log"
+	"os"
 	"tournaments-api/classes"
 
 	"gorm.io/driver/postgres"
@@ -31,7 +31,7 @@ func Init() DataBase {
 		log.Panic("failed to connect database")
 	}
 
-	db.AutoMigrate(&classes.Tournament{}, &classes.Result{}, &classes.Metric{})
+	db.AutoMigrate(&classes.Tournament{}, &classes.Result{}, &classes.Metric{}, &classes.Metadata{})
 
 	DBManager.DataBase = db
 
