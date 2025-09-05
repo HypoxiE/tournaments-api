@@ -1,12 +1,12 @@
 package post
 
 import (
-	"log"
 	"fmt"
+	"io"
+	"log"
+	"net/http"
 	"tournaments-api/classes"
 	"tournaments-api/database"
-	"net/http"
-	"io"
 
 	"github.com/gin-gonic/gin"
 )
@@ -32,7 +32,8 @@ func Registration(c *gin.Context, manager *database.DataBase) {
 		return
 	}
 
-	find_key := func(metric classes.Metric) bool {
+	// Проверка метрик
+	find_metric_key := func(metric classes.Metric) bool {
 		for _, variable := range tournament.Variables {
 			if variable == metric.Key {
 				return true
@@ -41,8 +42,8 @@ func Registration(c *gin.Context, manager *database.DataBase) {
 		return false
 	}
 	for _, metric := range user.Metrics {
-		if !find_key(metric) {
-			err = fmt.Errorf("Error: unknown metric %v", metric.Key)
+		if !find_metric_key(metric) {
+			err = fmt.Errorf("error: unknown metric %v", metric.Key)
 		}
 	}
 	if err != nil {
@@ -50,6 +51,39 @@ func Registration(c *gin.Context, manager *database.DataBase) {
 		return
 	}
 
+	// Проверка метаданных
+	find_meta_key := func(meta classes.Metadata) bool {
+		for _, variable := range tournament.Metadata {
+			if variable == meta.Key {
+				return true
+			}
+		}
+		return false
+	}
+	for _, meta := range user.Metadata {
+		if !find_meta_key(meta) {
+			err = fmt.Errorf("error: unknown metric %v", meta.Key)
+		}
+	}
+	find_key_in_meta := func(meta string) bool {
+		for _, variable := range user.Metadata {
+			if variable.Key == meta {
+				return true
+			}
+		}
+		return false
+	}
+	for _, meta := range tournament.Metadata {
+		if !find_key_in_meta(meta) {
+			err = fmt.Errorf("error: unknown metric %v", meta)
+		}
+	}
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Считаем количество очков
 	err = user.CalculateScore(tournament)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

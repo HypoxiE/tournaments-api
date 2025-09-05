@@ -4,7 +4,7 @@ import (
 	"github.com/Knetic/govaluate"
 )
 
-func (result *Result) CalculateScore(tournament Tournament) (error) {
+func (result *Result) CalculateScore(tournament Tournament) error {
 	expr, err := govaluate.NewEvaluableExpression(tournament.Formula)
 	if err != nil {
 		return err
