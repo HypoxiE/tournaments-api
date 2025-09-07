@@ -54,5 +54,7 @@ func TournamentDataFromJson(jsonData []byte, ip string) (Tournament, error) {
 		return tournament, err
 	}
 
+	tournament.ID = 0
+
 	return tournament, nil
 }

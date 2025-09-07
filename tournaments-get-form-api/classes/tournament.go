@@ -14,7 +14,7 @@ type Tournament struct {
 	Metadata       pq.StringArray `gorm:"type:text[]" json:"metadata"`
 	Variables      pq.StringArray `gorm:"type:text[]" json:"variables"`
 	Formula        string         `json:"formula"`
-	Results        []Result
+	Results        []Result       `json:"results"`
 }
 
 func (tournament Tournament) ToJson() ([]byte, error) {

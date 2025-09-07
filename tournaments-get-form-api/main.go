@@ -9,6 +9,7 @@ import (
 	"tournaments-api/http_funcs/get"
 	"tournaments-api/http_funcs/post"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/time/rate"
 )
@@ -29,8 +30,11 @@ func RateLimitMiddleware(r rate.Limit, b int) gin.HandlerFunc {
 func main() {
 	runtime.GOMAXPROCS(1)
 	router := gin.Default()
-	adminRouter := gin.Default()
+	router.Use(cors.Default())
 	router.Use(RateLimitMiddleware(5, 10))
+
+	adminRouter := gin.Default()
+	adminRouter.Use(cors.Default())
 
 	manager := database.Init()
 	log.Println("[INFO] Инициализация завершена!")
@@ -39,7 +43,7 @@ func main() {
 		post.Registration(c, &manager)
 	})
 
-	router.GET("/leaderbord", func(c *gin.Context) {
+	router.GET("/leaderboard", func(c *gin.Context) {
 		get.Leaderbord(c, &manager)
 	})
 
