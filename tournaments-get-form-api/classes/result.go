@@ -7,24 +7,24 @@ import (
 )
 
 type Result struct {
-	ID           uint       `gorm:"primaryKey" json:"result_id"`
-	TournamentID uint       `json:"tournament_id"`
+	ID           uint       `gorm:"column:result_id;primaryKey" json:"result_id"`
+	TournamentID uint       `gorm:"column:tournament_id" json:"tournament_id"`
 	Tournament   Tournament `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"-"`
-	Username     string     `json:"username"`
-	Avatar       string     `json:"avatar_url"`
-	Version      string     `json:"version"`
-	Score        int        `json:"score"`
-	Cost         int        `json:"cost"`
-	Status       int        `json:"status"` // 0 - не проверено; 1 - проверено, разрешено; -1 - проверено, заблокировано; -2 - автоматическая блокировка
-	Timestamp    uint64     `json:"timestamp"`
+	Username     string     `gorm:"column:username" json:"username"`
+	Avatar       string     `gorm:"column:avatar_url" json:"avatar_url"`
+	Version      string     `gorm:"column:version" json:"version"`
+	Score        int        `gorm:"column:score" json:"score"`
+	Cost         int        `gorm:"column:cost" json:"cost"`
+	Status       int        `gorm:"column:status" json:"status"` // 0 - не проверено; 1 - проверено, разрешено; -1 - проверено, заблокировано; -2 - автоматическая блокировка
+	Timestamp    uint64     `gorm:"column:timestamp" json:"timestamp"`
 
 	//confident
-	PublicSteamID string `json:"steam_id" gorm:"-"`
-	SteamID       string `json:"-"`
-	PublicMail    string `json:"mail" gorm:"-"`
-	Mail          string `json:"-"`
-	PublicIP      string `json:"ip" gorm:"-"`
-	IP            string `gorm:"type:inet" json:"-"`
+	PublicSteamID string `gorm:"-" json:"steam_id"`
+	SteamID       string `gorm:"column:steam_id" json:"-"`
+	PublicMail    string `gorm:"-" json:"mail"`
+	Mail          string `gorm:"column:mail" json:"-"`
+	PublicIP      string `gorm:"-" json:"ip"`
+	IP            string `gorm:"column:ip;type:inet" json:"-"`
 
 	Metrics  []Metric   `json:"metrics"`
 	Metadata []Metadata `json:"metadata"`
