@@ -50,10 +50,17 @@ func Registration(c *gin.Context, manager *database.DataBase) {
 		}
 		return false
 	}
+	var used_metrics []string
 	for _, metric := range user.Metrics {
 		if !find_metric_key(metric) {
 			err = fmt.Errorf("error: unknown metric %v", metric.Key)
 		}
+		for _, v := range used_metrics {
+			if metric.Key == v {
+				err = fmt.Errorf("error: metric %v duplicated", metric.Key)
+			}
+		}
+		used_metrics = append(used_metrics, metric.Key)
 	}
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -69,10 +76,17 @@ func Registration(c *gin.Context, manager *database.DataBase) {
 		}
 		return false
 	}
+	var used_metadata []string
 	for _, meta := range user.Metadata {
 		if !find_meta_key(meta) {
 			err = fmt.Errorf("error: unknown metadata %v", meta.Key)
 		}
+		for _, v := range used_metadata {
+			if meta.Key == v {
+				err = fmt.Errorf("error: metadata %v duplicated", meta.Key)
+			}
+		}
+		used_metadata = append(used_metrics, meta.Key)
 	}
 	find_key_in_meta := func(meta string) bool {
 		for _, variable := range user.Metadata {
