@@ -63,7 +63,7 @@ func Registration(c *gin.Context, manager *database.DataBase) {
 		used_metrics = append(used_metrics, metric.Key)
 	}
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -102,14 +102,14 @@ func Registration(c *gin.Context, manager *database.DataBase) {
 		}
 	}
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	// Считаем количество очков
 	err = user.CalculateScore(tournament)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
