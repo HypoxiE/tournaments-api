@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"runtime"
 	"tournaments-api/database"
+	"tournaments-api/http_admin_funcs/adminget"
 	"tournaments-api/http_admin_funcs/adminpost"
 	"tournaments-api/http_funcs/get"
 	"tournaments-api/http_funcs/post"
@@ -47,8 +48,12 @@ func main() {
 		get.Leaderbord(c, &manager)
 	})
 
-	adminRouter.POST("/add_tournament", func(c *gin.Context) {
+	adminRouter.POST("/admin/add_tournament", func(c *gin.Context) {
 		adminpost.AddTournament(c, &manager)
+	})
+
+	adminRouter.POST("/admin/leaderboard", func(c *gin.Context) {
+		adminget.Leaderbord(c, &manager)
 	})
 
 	go func() {

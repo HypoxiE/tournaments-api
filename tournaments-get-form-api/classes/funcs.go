@@ -19,7 +19,7 @@ func RegDataFromJson(jsonData []byte, ip string) (Result, error) {
 	} else if result.Username == "" {
 		err := errors.New("error: The username field is missing")
 		return result, err
-	} else if result.GetterMail == "" {
+	} else if result.PublicMail == "" {
 		err := errors.New("error: The mail field is missing")
 		return result, err
 	} else if result.Version == "" {
@@ -27,8 +27,8 @@ func RegDataFromJson(jsonData []byte, ip string) (Result, error) {
 		return result, err
 	}
 
-	result.SteamID = result.GetterSteamID
-	result.Mail = result.GetterMail
+	result.SteamID = result.PublicSteamID
+	result.Mail = result.PublicMail
 
 	result.Timestamp = uint64(time.Now().Unix())
 	result.ID = 0

@@ -19,10 +19,11 @@ type Result struct {
 	Timestamp    uint64     `json:"timestamp"`
 
 	//confident
-	GetterSteamID string `json:"steam_id" gorm:"-"`
+	PublicSteamID string `json:"steam_id" gorm:"-"`
 	SteamID       string `json:"-"`
-	GetterMail    string `json:"mail" gorm:"-"`
+	PublicMail    string `json:"mail" gorm:"-"`
 	Mail          string `json:"-"`
+	PublicIP      string `json:"ip" gorm:"-"`
 	IP            string `gorm:"type:inet" json:"-"`
 
 	Metrics  []Metric   `json:"metrics"`
