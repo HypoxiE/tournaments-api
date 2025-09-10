@@ -74,13 +74,13 @@ func UpdateResult(c *gin.Context, manager *database.DataBase) {
 			c.JSON(http.StatusOK, gin.H{"updated": result})
 		}
 	case "tournament":
-		for _, jsonMetadata := range data.Data {
-			var metadata classes.Metadata
-			if err := json.Unmarshal(jsonMetadata, &metadata); err != nil {
+		for _, jsonTournament := range data.Data {
+			var tournament classes.Tournament
+			if err := json.Unmarshal(jsonTournament, &tournament); err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 				return
 			}
-			db := manager.DataBase.Model(&metadata).Updates(metadata)
+			db := manager.DataBase.Model(&tournament).Updates(tournament)
 			if db.Error != nil {
 				c.JSON(http.StatusBadRequest, gin.H{"error": db.Error})
 				return
