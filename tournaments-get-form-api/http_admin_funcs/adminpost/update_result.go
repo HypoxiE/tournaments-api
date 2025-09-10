@@ -94,7 +94,20 @@ func UpdateResult(c *gin.Context, manager *database.DataBase) {
 				c.JSON(http.StatusBadRequest, gin.H{"error": db.Error})
 				return
 			}
-			c.JSON(http.StatusOK, gin.H{"updated": result})
+
+			if err := manager.DataBase.Preload("Tournament").Preload("Metrics").First(&result, result.ID).Error; err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				return
+			}
+			result.CalculateScore(result.Tournament)
+
+			db = manager.DataBase.Model(&result).Updates(result)
+			if db.Error != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": db.Error})
+				return
+			}
+
+			c.JSON(http.StatusOK, gin.H{"updated": result.Username})
 		}
 	case "tournament":
 		for _, jsonTournament := range data.Data {
