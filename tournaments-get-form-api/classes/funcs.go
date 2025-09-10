@@ -32,7 +32,7 @@ func RegDataFromJson(jsonData []byte, ip string) (Result, error) {
 
 	result.Timestamp = uint64(time.Now().Unix())
 	result.ID = 0
-	result.Status = 0
+	result.Status = 1
 	result.Score = 0
 	result.IP = ip
 

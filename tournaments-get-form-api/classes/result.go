@@ -15,8 +15,9 @@ type Result struct {
 	Version      string     `gorm:"column:version" json:"version"`
 	Score        int        `gorm:"column:score" json:"score"`
 	Cost         int        `gorm:"column:cost" json:"cost"`
-	Status       int        `gorm:"column:status" json:"status"` // 0 - не проверено; 1 - проверено, разрешено; -1 - проверено, заблокировано; -2 - автоматическая блокировка
-	Timestamp    uint64     `gorm:"column:timestamp" json:"timestamp"`
+	// 1 - не проверено; 2 - проверено, разрешено; -1 - проверено, заблокировано; -2 - автоматическая блокировка
+	Status    int    `gorm:"column:status" json:"status"`
+	Timestamp uint64 `gorm:"column:timestamp" json:"timestamp"`
 
 	//confident
 	PublicSteamID string `gorm:"-" json:"steam_id"`
