@@ -29,6 +29,7 @@ type Result struct {
 	Avatar       string     `gorm:"column:avatar_url" json:"avatar_url"`
 	Version      string     `gorm:"column:version" json:"version"`
 	Score        int        `gorm:"column:score" json:"score"`
+	Penalty      int        `gorm:"column:penalty" json:"penalty"`
 	Cost         int        `gorm:"column:cost" json:"cost"`
 	// 1 - не проверено; 2 - проверено, разрешено; -1 - проверено, заблокировано; -2 - автоматическая блокировка
 	Status    int    `gorm:"column:status" json:"status"`
@@ -54,6 +55,7 @@ func (input CreateResultInput) NewResultFromInput(ip string) Result {
 		Avatar:    input.Avatar,
 		Version:   input.Version,
 		Score:     0,
+		Penalty:   0,
 		Cost:      input.Cost,
 		Status:    1,
 		Timestamp: uint64(time.Now().Unix()),
@@ -92,7 +94,7 @@ func (result *Result) CalculateScore(tournament Tournament) error {
 		return err
 	}
 
-	result.Score = int(score.(float64))
+	result.Score = int(score.(float64)) - result.Penalty
 
 	return nil
 }
