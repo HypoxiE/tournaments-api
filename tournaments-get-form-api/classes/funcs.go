@@ -3,15 +3,16 @@ package classes
 import (
 	"encoding/json"
 	"errors"
-	"time"
 )
 
 // формат входных данных {"tournament_id": 1, "username": "Hypoxie","avatar_url": "", "mail": "hypoxie@example.com", "version": "1.6.54s2", "cost": 451, "steam_id": "hypoxie", "metrics":[{"key":"colonists", "value":4}, {"key":"animals", "value":5}]}
 func RegDataFromJson(jsonData []byte, ip string) (Result, error) {
-	var result Result
-	if err := json.Unmarshal(jsonData, &result); err != nil {
-		return result, err
+	var raw_result CreateResultInput
+	if err := json.Unmarshal(jsonData, &raw_result); err != nil {
+		return raw_result.NewResultFromInput(ip), err
 	}
+
+	var result Result = raw_result.NewResultFromInput(ip)
 
 	if result.TournamentID == 0 {
 		err := errors.New("error: The tournament_id field is missing")
@@ -26,15 +27,6 @@ func RegDataFromJson(jsonData []byte, ip string) (Result, error) {
 		err := errors.New("error: The version field is missing")
 		return result, err
 	}
-
-	result.SteamID = result.PublicSteamID
-	result.Mail = result.PublicMail
-
-	result.Timestamp = uint64(time.Now().Unix())
-	result.ID = 0
-	result.Status = 1
-	result.Score = 0
-	result.IP = ip
 
 	return result, nil
 }
