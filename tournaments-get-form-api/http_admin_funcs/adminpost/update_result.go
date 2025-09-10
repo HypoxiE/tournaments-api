@@ -34,6 +34,7 @@ func UpdateResult(c *gin.Context, manager *database.DataBase) {
 
 	switch data.DataType {
 	case "metric":
+		set := make(map[uint]struct{})
 		for _, jsonMetric := range data.Data {
 			var metric classes.Metric
 			if err := json.Unmarshal(jsonMetric, &metric); err != nil {
@@ -45,7 +46,29 @@ func UpdateResult(c *gin.Context, manager *database.DataBase) {
 				c.JSON(http.StatusBadRequest, gin.H{"error": db.Error})
 				return
 			}
+			if err := db.First(&metric, metric.ID).Error; err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				return
+			}
+			set[metric.ResultID] = struct{}{}
 		}
+		unique := make([]string, 0, len(set))
+		for value := range set {
+			var result classes.Result
+			if err := manager.DataBase.Preload("Tournament").Preload("Metrics").First(&result, value).Error; err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				return
+			}
+			result.CalculateScore(result.Tournament)
+
+			db := manager.DataBase.Model(&result).Updates(result)
+			if db.Error != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": db.Error})
+				return
+			}
+			unique = append(unique, result.Username)
+		}
+		c.JSON(http.StatusOK, gin.H{"updated": unique})
 	case "metadata":
 		for _, jsonMetadata := range data.Data {
 			var metadata classes.Metadata
