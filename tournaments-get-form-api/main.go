@@ -52,6 +52,10 @@ func main() {
 		adminpost.AddTournament(c, &manager)
 	})
 
+	adminRouter.POST("/admin/update_result", func(c *gin.Context) {
+		adminpost.UpdateResult(c, &manager)
+	})
+
 	adminRouter.GET("/admin/leaderboard", func(c *gin.Context) {
 		adminget.Leaderbord(c, &manager)
 	})
