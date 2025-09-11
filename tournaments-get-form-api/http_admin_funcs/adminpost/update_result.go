@@ -34,6 +34,8 @@ func UpdateResult(c *gin.Context, manager *database.DataBase) {
 		return
 	}
 
+	changed_results_id := make(map[uint]struct{})
+
 	// Metrics
 	set := make(map[uint]struct{})
 	for _, jsonMetric := range data.Metrics {
@@ -52,8 +54,8 @@ func UpdateResult(c *gin.Context, manager *database.DataBase) {
 			return
 		}
 		set[metric.ResultID] = struct{}{}
+		changed_results_id[metric.ResultID] = struct{}{}
 	}
-	unique := make([]string, 0, len(set))
 	for value := range set {
 		var result classes.Result
 		if err := manager.DataBase.Preload("Tournament").Preload("Metrics").First(&result, value).Error; err != nil {
@@ -67,9 +69,7 @@ func UpdateResult(c *gin.Context, manager *database.DataBase) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": db.Error})
 			return
 		}
-		unique = append(unique, result.Username)
 	}
-	c.JSON(http.StatusOK, gin.H{"updated": unique})
 
 	// Metadata
 	for _, jsonMetadata := range data.Metadata {
@@ -83,6 +83,7 @@ func UpdateResult(c *gin.Context, manager *database.DataBase) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": db.Error})
 			return
 		}
+		changed_results_id[metadata.ResultID] = struct{}{}
 	}
 
 	// Results
@@ -109,9 +110,15 @@ func UpdateResult(c *gin.Context, manager *database.DataBase) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": db.Error})
 			return
 		}
-
-		c.JSON(http.StatusOK, gin.H{"updated": result.Username})
+		changed_results_id[result.ID] = struct{}{}
 	}
+
+	unique := make([]uint, 0, len(set))
+	for value := range changed_results_id {
+		unique = append(unique, value)
+	}
+
+	c.JSON(http.StatusOK, gin.H{"updated": unique})
 
 	// Tournaments
 	for _, jsonTournament := range data.Tournaments {
