@@ -103,3 +103,8 @@ func (result Result) ToJson() ([]byte, error) {
 	jsonBytes, err := json.Marshal(result)
 	return jsonBytes, err
 }
+
+func (result *Result) PublicToPrivate() {
+	result.SteamID = result.PublicSteamID
+	result.Mail = result.PublicMail
+}

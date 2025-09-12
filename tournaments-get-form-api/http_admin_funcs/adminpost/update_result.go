@@ -104,6 +104,7 @@ func UpdateResult(c *gin.Context, manager *database.DataBase) {
 			return
 		}
 		result.CalculateScore(result.Tournament)
+		result.PublicToPrivate()
 
 		db = manager.DataBase.Model(&result).Updates(result)
 		if db.Error != nil {
