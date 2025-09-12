@@ -160,7 +160,6 @@ func UnpackTournaments(manager *database.DataBase, tournaments []json.RawMessage
 	return output, nil
 }
 
-// data_type: "metric", "metadata", "result", "tournament"
 // {"metrics": [], "metadata": [], "results": [], "tournaments": []}
 func UpdateResult(c *gin.Context, manager *database.DataBase) {
 	body, err := io.ReadAll(c.Request.Body)
