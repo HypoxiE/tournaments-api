@@ -47,6 +47,9 @@ func main() {
 	router.GET("/leaderboard", func(c *gin.Context) {
 		get.Leaderbord(c, &manager)
 	})
+	router.GET("/tournaments", func(c *gin.Context) {
+		get.Tournaments(c, &manager)
+	})
 
 	adminRouter.POST("/admin/add_tournament", func(c *gin.Context) {
 		adminpost.AddTournament(c, &manager)
