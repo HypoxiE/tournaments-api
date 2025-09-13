@@ -8,15 +8,15 @@ import (
 )
 
 type CreateResultInput struct {
-	TournamentID uint   `json:"tournament_id"`
-	Username     string `json:"username"`
-	Avatar       string `json:"avatar_url"`
-	Version      string `json:"version"`
-	Cost         int    `json:"cost"`
+	TournamentID uint    `json:"tournament_id"`
+	Username     string  `json:"username"`
+	Avatar       *string `json:"avatar_url"`
+	Version      string  `json:"version"`
+	Cost         *int    `json:"cost"`
 
-	PublicSteamID string `json:"steam_id"`
-	PublicMail    string `json:"mail"`
-	PublicIP      string `json:"ip"`
+	PublicSteamID *string `json:"steam_id"`
+	PublicMail    string  `json:"mail"`
+	PublicIP      *string `json:"ip"`
 
 	Metrics  []CreateMetricInput   `json:"metrics"`
 	Metadata []CreateMetadataInput `json:"metadata"`
@@ -26,22 +26,22 @@ type Result struct {
 	TournamentID uint       `gorm:"column:tournament_id" json:"tournament_id"`
 	Tournament   Tournament `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"-"`
 	Username     string     `gorm:"column:username" json:"username"`
-	Avatar       string     `gorm:"column:avatar_url" json:"avatar_url"`
+	Avatar       *string    `gorm:"column:avatar_url" json:"avatar_url"`
 	Version      string     `gorm:"column:version" json:"version"`
-	Score        int        `gorm:"column:score" json:"score"`
-	Penalty      int        `gorm:"column:penalty" json:"penalty"`
-	Cost         int        `gorm:"column:cost" json:"cost"`
+	Score        *int       `gorm:"column:score" json:"score"`
+	Penalty      *int       `gorm:"column:penalty" json:"penalty"`
+	Cost         *int       `gorm:"column:cost" json:"cost"`
 	// 1 - не проверено; 2 - проверено, разрешено; -1 - проверено, заблокировано; -2 - автоматическая блокировка
-	Status    int    `gorm:"column:status" json:"status"`
+	Status    *int   `gorm:"column:status" json:"status"`
 	Timestamp uint64 `gorm:"column:timestamp" json:"timestamp"`
 
 	//confident
-	PublicSteamID string `gorm:"-" json:"steam_id"`
-	SteamID       string `gorm:"column:steam_id" json:"-"`
-	PublicMail    string `gorm:"-" json:"mail"`
-	Mail          string `gorm:"column:mail" json:"-"`
-	PublicIP      string `gorm:"-" json:"ip"`
-	IP            string `gorm:"column:ip;type:inet" json:"-"`
+	PublicSteamID *string `gorm:"-" json:"steam_id"`
+	SteamID       *string `gorm:"column:steam_id" json:"-"`
+	PublicMail    string  `gorm:"-" json:"mail"`
+	Mail          string  `gorm:"column:mail" json:"-"`
+	PublicIP      *string `gorm:"-" json:"ip"`
+	IP            *string `gorm:"column:ip;type:inet" json:"-"`
 
 	Metrics  []Metric   `json:"metrics"`
 	Metadata []Metadata `json:"metadata"`
@@ -52,20 +52,20 @@ func (input CreateResultInput) NewResultFromInput(ip string) Result {
 		TournamentID: input.TournamentID,
 
 		Username:  input.Username,
-		Avatar:    input.Avatar,
+		Avatar:    OrElsePtr(input.Avatar, ""),
 		Version:   input.Version,
-		Score:     0,
-		Penalty:   0,
-		Cost:      input.Cost,
-		Status:    1,
+		Score:     GetPtr(0),
+		Penalty:   GetPtr(0),
+		Cost:      OrElsePtr(input.Cost, 0),
+		Status:    GetPtr(1),
 		Timestamp: uint64(time.Now().Unix()),
 
-		PublicSteamID: input.PublicSteamID,
-		SteamID:       input.PublicSteamID,
+		PublicSteamID: OrElsePtr(input.PublicSteamID, ""),
+		SteamID:       OrElsePtr(input.PublicSteamID, ""),
 		PublicMail:    input.PublicMail,
 		Mail:          input.PublicMail,
-		PublicIP:      ip,
-		IP:            ip,
+		PublicIP:      GetPtr(ip),
+		IP:            GetPtr(ip),
 	}
 
 	for _, v := range input.Metrics {
@@ -86,7 +86,7 @@ func (result *Result) CalculateScore(tournament Tournament) error {
 
 	params := make(map[string]interface{})
 	for _, m := range result.Metrics {
-		params[m.Key] = m.Value
+		params[m.Key] = *m.Value
 	}
 
 	score, err := expr.Evaluate(params)
@@ -94,7 +94,7 @@ func (result *Result) CalculateScore(tournament Tournament) error {
 		return err
 	}
 
-	result.Score = int(score.(float64)) - result.Penalty
+	result.Score = GetPtr(int(score.(float64)) - *result.Penalty)
 
 	return nil
 }

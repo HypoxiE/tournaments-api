@@ -64,3 +64,14 @@ func GetUnique[T comparable](input []T) []T {
 
 	return result
 }
+
+func GetPtr[T any](data T) *T {
+	return &data
+}
+
+func OrElsePtr[T any](ptr *T, fallback T) *T {
+	if ptr != nil {
+		return ptr
+	}
+	return &fallback
+}
