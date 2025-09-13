@@ -24,7 +24,11 @@ func Leaderbord(c *gin.Context, manager *database.DataBase) {
 		Preload("Results", func(db *gorm.DB) *gorm.DB {
 			return db.Where("status >= ?", 0).Order("score DESC, cost DESC")
 		}).
-		Preload("Results.Metrics").Preload("Results.Metadata").First(&result, tournament_id).Error; err != nil {
+		Preload("Results.Metrics", func(db *gorm.DB) *gorm.DB {
+			return db.Order("metric_key ASC")
+		}).Preload("Results.Metadata", func(db *gorm.DB) *gorm.DB {
+		return db.Order("metadata_key ASC")
+	}).First(&result, tournament_id).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
