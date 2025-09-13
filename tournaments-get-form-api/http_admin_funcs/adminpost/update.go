@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"tournaments-api/classes"
 	"tournaments-api/database"
+	"tournaments-api/funcs"
 
 	"github.com/gin-gonic/gin"
 )
@@ -29,12 +30,12 @@ type ResponseData struct {
 }
 
 func (response *ResponseData) unique() {
-	response.Results = classes.GetUnique(response.Results)
-	response.ResultsID = classes.GetUnique(response.ResultsID)
-	response.MetadataID = classes.GetUnique(response.MetadataID)
-	response.MetricsID = classes.GetUnique(response.MetricsID)
-	response.Tournaments = classes.GetUnique(response.Tournaments)
-	response.TournamentsID = classes.GetUnique(response.TournamentsID)
+	response.Results = funcs.GetUnique(response.Results)
+	response.ResultsID = funcs.GetUnique(response.ResultsID)
+	response.MetadataID = funcs.GetUnique(response.MetadataID)
+	response.MetricsID = funcs.GetUnique(response.MetricsID)
+	response.Tournaments = funcs.GetUnique(response.Tournaments)
+	response.TournamentsID = funcs.GetUnique(response.TournamentsID)
 }
 
 type UnpackMetricsOutput struct {
@@ -113,8 +114,7 @@ func UnpackResults(manager *database.DataBase, results []json.RawMessage) (Unpac
 		if err := json.Unmarshal(jsonResult, &result); err != nil {
 			return output, err
 		}
-		db := manager.DataBase.Model(&result).Updates(result)
-		if db.Error != nil {
+		if db := manager.DataBase.Model(&result).Updates(result); db.Error != nil {
 			return output, db.Error
 		}
 
@@ -124,8 +124,7 @@ func UnpackResults(manager *database.DataBase, results []json.RawMessage) (Unpac
 		result.CalculateScore(result.Tournament)
 		result.PublicToPrivate()
 
-		db = manager.DataBase.Model(&result).Updates(result)
-		if db.Error != nil {
+		if db := manager.DataBase.Model(&result).Updates(result); db.Error != nil {
 			return output, db.Error
 		}
 		output.ResultsName = append(output.ResultsName, result.Username)
@@ -149,12 +148,27 @@ func UnpackTournaments(manager *database.DataBase, tournaments []json.RawMessage
 		if err := json.Unmarshal(jsonTournament, &tournament); err != nil {
 			return output, err
 		}
-		db := manager.DataBase.Model(&tournament).Updates(tournament)
-		if db.Error != nil {
+		if db := manager.DataBase.Model(&tournament).Updates(tournament); db.Error != nil {
 			return output, db.Error
 		}
 		output.TournamentsID = append(output.TournamentsID, tournament.ID)
 		output.TournamentsName = append(output.TournamentsName, tournament.Name)
+
+		if err := manager.DataBase.Preload("Results.Metrics").First(&tournament, tournament.ID).Error; err != nil {
+			return output, err
+		}
+
+		for _, result := range tournament.Results {
+
+			result.CalculateScore(tournament)
+
+			if db := manager.DataBase.Model(&result).Updates(result); db.Error != nil {
+				return output, db.Error
+			}
+
+			output.ResultsID = append(output.ResultsID, result.ID)
+			output.ResultsName = append(output.ResultsName, result.Username)
+		}
 	}
 
 	return output, nil
