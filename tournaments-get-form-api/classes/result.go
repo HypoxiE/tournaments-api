@@ -40,8 +40,8 @@ type Result struct {
 	SteamID       *string `gorm:"column:steam_id" json:"-"`
 	PublicMail    string  `gorm:"-" json:"mail"`
 	Mail          string  `gorm:"column:mail" json:"-"`
-	PublicIP      *string `gorm:"-" json:"ip"`
-	IP            *string `gorm:"column:ip;type:inet" json:"-"`
+	PublicIP      string  `gorm:"-" json:"ip"`
+	IP            string  `gorm:"column:ip;type:inet" json:"-"`
 
 	Metrics  []Metric   `json:"metrics"`
 	Metadata []Metadata `json:"metadata"`
@@ -64,8 +64,8 @@ func (input CreateResultInput) NewResultFromInput(ip string) Result {
 		SteamID:       OrElsePtr(input.PublicSteamID, ""),
 		PublicMail:    input.PublicMail,
 		Mail:          input.PublicMail,
-		PublicIP:      GetPtr(ip),
-		IP:            GetPtr(ip),
+		PublicIP:      ip,
+		IP:            ip,
 	}
 
 	for _, v := range input.Metrics {
@@ -86,7 +86,7 @@ func (result *Result) CalculateScore(tournament Tournament) error {
 
 	params := make(map[string]interface{})
 	for _, m := range result.Metrics {
-		params[m.Key] = *m.Value
+		params[m.Key] = m.Value
 	}
 
 	score, err := expr.Evaluate(params)

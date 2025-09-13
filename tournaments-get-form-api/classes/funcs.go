@@ -75,3 +75,9 @@ func OrElsePtr[T any](ptr *T, fallback T) *T {
 	}
 	return &fallback
 }
+func OrElseVal[T any](ptr *T, fallback T) T {
+	if ptr != nil {
+		return *ptr
+	}
+	return fallback
+}
